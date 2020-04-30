@@ -77,6 +77,8 @@ Minor features
 * Filters in the right sidebar of the admin changelist view now contains a link
   to clear all filters.
 
+* ``XRegExp`` is upgraded from version 2.0.0 to 3.2.0.
+
 :mod:`django.contrib.admindocs`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -95,6 +97,10 @@ Minor features
 
 * The password reset mechanism now uses the SHA-256 hashing algorithm. Support
   for tokens that use the old hashing algorithm remains until Django 4.0.
+
+* :meth:`.AbstractBaseUser.get_session_auth_hash` now uses the SHA-256 hashing
+  algorithm. Support for user sessions that use the old hashing algorithm
+  remains until Django 4.0.
 
 :mod:`django.contrib.contenttypes`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,6 +121,8 @@ Minor features
 
 * Added the :class:`~django.contrib.gis.db.models.functions.AsWKB` and
   :class:`~django.contrib.gis.db.models.functions.AsWKT` functions.
+
+* Added support for PostGIS 3.
 
 :mod:`django.contrib.humanize`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -248,6 +256,11 @@ File Storage
 
 * ``FileSystemStorage.save()`` method now supports :class:`pathlib.Path`.
 
+* :class:`~django.db.models.FileField` and
+  :class:`~django.db.models.ImageField` now accept a callable for ``storage``.
+  This allows you to modify the used storage at runtime, selecting different
+  storages for different environments, for example.
+
 File Uploads
 ~~~~~~~~~~~~
 
@@ -272,6 +285,9 @@ Forms
 
 * :attr:`.MultiWidget.widgets` now accepts a dictionary which allows
   customizing subwidget ``name`` attributes.
+
+* The new :attr:`.BoundField.widget_type` property can be used to dynamically
+  adjust form rendering based upon the widget type.
 
 Generic Views
 ~~~~~~~~~~~~~
@@ -302,6 +318,16 @@ Management Commands
 
 * The new :option:`migrate --check` option makes the command exit with a
   non-zero status when unapplied migrations are detected.
+
+* The new ``returncode`` argument for
+  :attr:`~django.core.management.CommandError` allows customizing the exit
+  status for management commands.
+
+* The new :option:`dbshell -- ARGUMENTS <dbshell -->` option allows passing
+  extra arguments to the command-line client for the database.
+
+* The :djadmin:`flush` and :djadmin:`sqlflush` commands now include SQL to
+  reset sequences on SQLite.
 
 Migrations
 ~~~~~~~~~~
@@ -351,6 +377,13 @@ Models
   SQL on MySQL by using ``DELETE`` instead of ``TRUNCATE`` statements for
   tables which don't require resetting sequences.
 
+* SQLite functions are now marked as :py:meth:`deterministic
+  <sqlite3.Connection.create_function>` on Python 3.8+. This allows using them
+  in check constraints and partial indexes.
+
+* The new :attr:`.UniqueConstraint.deferrable` attribute allows creating
+  deferrable unique constraints.
+
 Pagination
 ~~~~~~~~~~
 
@@ -382,6 +415,14 @@ Security
   already have it. This prevents the ``Referer`` header being sent to other
   origins. If you need the previous behavior, explicitly set
   :setting:`SECURE_REFERRER_POLICY` to ``None``.
+
+* The default :class:`django.core.signing.Signer` algorithm is changed to the
+  SHA-256. Support for signatures made with the old SHA-1 algorithm remains
+  until Django 4.0.
+
+  Also, the new ``algorithm`` parameter of the
+  :class:`~django.core.signing.Signer` allows customizing the hashing
+  algorithm.
 
 Serialization
 ~~~~~~~~~~~~~
@@ -486,6 +527,20 @@ backends.
   ``connection._nodb_cursor()`` method and now returns a context manager that
   yields a cursor and automatically closes the cursor and connection upon
   exiting the ``with`` statement.
+
+* ``DatabaseClient.runshell()`` now requires an additional ``parameters``
+  argument as a list of extra arguments to pass on to the command-line client.
+
+* The ``sequences`` positional argument of ``DatabaseOperations.sql_flush()``
+  is replaced by the boolean keyword-only argument ``reset_sequences``. If
+  ``True``, the sequences of the truncated tables will be reset.
+
+* The ``allow_cascade`` argument of ``DatabaseOperations.sql_flush()`` is now a
+  keyword-only argument.
+
+* The ``using`` positional argument of
+  ``DatabaseOperations.execute_sql_flush()`` is removed. The method now uses
+  the database of the called instance.
 
 Dropped support for MariaDB 10.1
 --------------------------------
@@ -617,6 +672,14 @@ Miscellaneous
   argument to be a string or bytes. Other types should be explicitly cast to
   one of these.
 
+* The undocumented ``version`` parameter to the
+  :class:`~django.contrib.gis.db.models.functions.AsKML` function is removed.
+
+* :ref:`JSON and YAML serializers <serialization-formats>`, used by
+  :djadmin:`dumpdata`, now dump all data with Unicode by default. If you need
+  the previous behavior, pass ``ensure_ascii=True`` to JSON serializer, or
+  ``allow_unicode=False`` to YAML serializer.
+
 .. _deprecated-features-3.1:
 
 Features deprecated in 3.1
@@ -677,6 +740,13 @@ Miscellaneous
 * The passing of URL kwargs directly to the context by
   :class:`~django.views.generic.base.TemplateView` is deprecated. Reference
   them in the template with ``view.kwargs`` instead.
+
+* Passing raw column aliases to :meth:`.QuerySet.order_by` is deprecated. The
+  same result can be achieved by passing aliases in a
+  :class:`~django.db.models.expressions.RawSQL` instead beforehand.
+
+* The ``NullBooleanField`` model field is deprecated in favor of
+  ``BooleanField(null=True)``.
 
 .. _removed-features-3.1:
 

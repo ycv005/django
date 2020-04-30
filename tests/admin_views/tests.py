@@ -4842,17 +4842,17 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         self.assertContains(response, '<div class="help">', 3)
         self.assertContains(
             response,
-            '<div class="help">Some help text for the title (with unicode ŠĐĆŽćžšđ)</div>',
+            '<div class="help">Some help text for the title (with Unicode ŠĐĆŽćžšđ)</div>',
             html=True
         )
         self.assertContains(
             response,
-            '<div class="help">Some help text for the content (with unicode ŠĐĆŽćžšđ)</div>',
+            '<div class="help">Some help text for the content (with Unicode ŠĐĆŽćžšđ)</div>',
             html=True
         )
         self.assertContains(
             response,
-            '<div class="help">Some help text for the date (with unicode ŠĐĆŽćžšđ)</div>',
+            '<div class="help">Some help text for the date (with Unicode ŠĐĆŽćžšđ)</div>',
             html=True
         )
 
@@ -4962,7 +4962,7 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         response = self.client.get(reverse('admin:admin_views_fieldoverridepost_change', args=(p.pk,)))
         self.assertContains(response, '<div class="help">Overridden help text for the date</div>')
         self.assertContains(response, '<label for="id_public">Overridden public label:</label>', html=True)
-        self.assertNotContains(response, "Some help text for the date (with unicode ŠĐĆŽćžšđ)")
+        self.assertNotContains(response, 'Some help text for the date (with Unicode ŠĐĆŽćžšđ)')
 
     def test_correct_autoescaping(self):
         """
@@ -5502,7 +5502,7 @@ class DateHierarchyTests(TestCase):
         self.assertNotContains(response, formats.number_format(year))
 
     def assert_contains_year_link(self, response, date):
-        self.assertContains(response, '?release_date__year=%d"' % (date.year,))
+        self.assertContains(response, '?release_date__year=%d"' % date.year)
 
     def assert_contains_month_link(self, response, date):
         self.assertContains(
@@ -5619,7 +5619,7 @@ class DateHierarchyTests(TestCase):
 
         response = self.client.get(reverse('admin:admin_views_answer_changelist'))
         for date, answer_count in questions_data:
-            link = '?question__posted__year=%d"' % (date.year,)
+            link = '?question__posted__year=%d"' % date.year
             if answer_count > 0:
                 self.assertContains(response, link)
             else:
